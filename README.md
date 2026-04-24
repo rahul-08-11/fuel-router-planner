@@ -64,7 +64,7 @@ The app will be available at `http://localhost:8000`.
 
 ---
 
-## Manual setup (without Docker)
+## Manual setup (without Docker Compose)
 
 ### Requirements
 
@@ -94,42 +94,6 @@ python manage.py runserver
 
 ---
 
-## Docker files
-
-**`Dockerfile`**
-```dockerfile
-FROM python:3.12-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-EXPOSE 8000
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-```
-
-**`docker-compose.yml`**
-```yaml
-version: '3.9'
-
-services:
-  web:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-    command: python manage.py runserver 0.0.0.0:8000
-```
-
----
-
 ## API reference
 
 ### `POST /api/route/`
@@ -146,7 +110,7 @@ Content-Type: application/json
 ```json
 {
   "start": "Chicago, IL",
-  "end": "Los Angeles, CA"
+  "end": "Miami, FL"
 }
 ```
 
@@ -159,41 +123,53 @@ Content-Type: application/json
 
 ```json
 {
-  "start": "Chicago, IL",
-  "end": "Los Angeles, CA",
-  "total_distance_miles": 2026.1,
-  "total_fuel_cost_usd": 629.80,
-  "mpg": 10,
-  "fuel_stops": [
-    {
-      "stop_number": 1,
-      "name": "Kum & Go #0370",
-      "address": "I-80, EXIT 439 & SR-370",
-      "city": "Gretna",
-      "state": "NE",
-      "lat": 41.1234,
-      "lon": -96.4567,
-      "mile_marker": 484.1,
-      "price_per_gallon": 2.921,
-      "gallons_purchased": 50.0,
-      "stop_cost_usd": 146.05,
-      "full_tank_fill": true
-    },
-    {
-      "stop_number": 2,
-      "name": "Circle K #2709846",
-      "address": "I-25, EXIT 240",
-      "city": "Longmont",
-      "state": "CO",
-      "lat": 40.1289,
-      "lon": -105.1023,
-      "mile_marker": 981.3,
-      "price_per_gallon": 3.057,
-      "gallons_purchased": 50.0,
-      "stop_cost_usd": 152.85,
-      "full_tank_fill": true
-    }
-  ]
+    "start": "Chicago, IL",
+    "end": "Miami, FL",
+    "total_distance_miles": 1380.6,
+    "total_fuel_cost_usd": 418.1,
+    "starting_fuel_cost_usd": 148.73,
+    "mpg": 10,
+    "fuel_stops": [
+        {
+            "stop_number": 1,
+            "name": "Circle K #4703975",
+            "address": "SR-109 & US-70",
+            "city": "Lebanon",
+            "state": "TN",
+            "lat": 36.204,
+            "lon": -86.3481,
+            "mile_marker": 486.2,
+            "price_per_gallon": 2.872,
+            "gallons_purchased": 48.62,
+            "stop_cost_usd": 139.65
+        },
+        {
+            "stop_number": 2,
+            "name": "Bp",
+            "address": "SR-76",
+            "city": "Adel",
+            "state": "GA",
+            "lat": 31.1264,
+            "lon": -83.4229,
+            "mile_marker": 923.1,
+            "price_per_gallon": 2.969,
+            "gallons_purchased": 43.69,
+            "stop_cost_usd": 129.72
+        },
+        {
+            "stop_number": 3,
+            "name": "4 Points Market",
+            "address": "US-441/SR-7 & SR-804",
+            "city": "Boynton Beach",
+            "state": "FL",
+            "lat": 26.5281,
+            "lon": -80.0811,
+            "mile_marker": 1327.1,
+            "price_per_gallon": 3.229,
+            "gallons_purchased": 0.0,
+            "stop_cost_usd": 0.0
+        }
+    ]
 }
 ```
 
@@ -206,7 +182,6 @@ Content-Type: application/json
 | `mile_marker` | Actual distance from start where this stop falls on the route, snapped to the nearest polyline point |
 | `gallons_purchased` | Always a full tank (50 gal) — ensures the truck has maximum range leaving every stop |
 | `stop_cost_usd` | Cost at this specific stop |
-| `full_tank_fill` | Always `true` — every stop fills a complete tank |
 
 **Error responses**
 
@@ -263,7 +238,6 @@ The optimiser walks the route in overlapping windows to decide when and where to
 3. **Selection** — the cheapest candidate by price per gallon is chosen. If no station is found, the search radius is doubled before giving up.
 4. **Route snapping** — the chosen station is off the highway. Its mile marker is determined by finding the route polyline point closest to the station's GPS coordinates. This ensures gallons purchased and the next window both reflect the real stop position, not just the window boundary.
 5. **Fill up** — a full tank (50 gallons) is purchased at every stop. This guarantees the truck can always reach the next stop (400-mile window, 500-mile tank = 100-mile buffer) and arrives at the destination ready to drive again immediately.
-6. **Advance** — `last_stop_mile` is updated to the snapped mile marker and the loop repeats.
 
 ---
 
