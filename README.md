@@ -13,6 +13,7 @@ A Django REST API that plans the most cost-effective fuel stops for a road trip 
 **Result:** one ORS API call per unique route, everything else runs locally in memory.
 
 ---
+<img width="1729" height="877" alt="ui" src="https://github.com/user-attachments/assets/5c3b9fee-b8db-40a4-b624-16c7af348ff5" />
 
 ## Features
  
@@ -226,6 +227,7 @@ curl -X POST http://localhost:8000/api/route/ \
 ### Using the web UI
 
 Navigate to `http://localhost:8000` in your browser. Enter a start and end city in `City, ST` format and click **Plan route**.
+
 
 ---
 
