@@ -1,0 +1,8 @@
+django 
+djangorestframework 
+requests 
+scipy 
+numpy 
+pandas
+geopy
+python-dotenv
